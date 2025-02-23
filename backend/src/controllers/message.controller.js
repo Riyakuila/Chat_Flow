@@ -1,5 +1,5 @@
-import { User } from "../models/user.model.js";
-import Message from "../model/message.model.js";
+import User from "../models/user.model.js";
+import Message from "../models/message.model.js";
 import cloudinary from "cloudinary";
 
 export const getUsersForSidebar = async (req, res) => {
@@ -56,6 +56,11 @@ export const sendMessage = async (req, res) => {
         });
 
         await newMessage.save();
+
+        const receiverSocketId = getReceiverSocketId(userToChatId);
+        if (receiverSocketId) {
+            io.to(receiverSocketId).emit("newMessage", newMessage);
+        }
         
         res.status(200).json({ message: "Message sent successfully" });
     } catch (error) {

@@ -8,6 +8,7 @@ import EventEmitter from 'events';
 import cors from 'cors';
 import chatRoutes from './src/routes/chat.routes.js';
 import userRoutes from './src/routes/user.routes.js';
+import {app, server} from './src/lib/soket.js';
 
 
 
@@ -16,7 +17,7 @@ import userRoutes from './src/routes/user.routes.js';
 dotenv.config();
 
 
-const app = express();
+
 
 const PORT = process.env.PORT;
 
@@ -51,6 +52,6 @@ connectDB();
 
 EventEmitter.defaultMaxListeners = 15;
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log("server is running on port:" + PORT);
 });

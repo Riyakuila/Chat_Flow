@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import axiosInstance from '../lib/axiosInstance';
 import toast from 'react-hot-toast';
-
+import { useAuthStore } from './useAuthStore';
 export const useChatStore = create((set, get) => ({
   selectedChat: null,
   chats: [],
@@ -41,14 +41,34 @@ export const useChatStore = create((set, get) => ({
   // Send a message
   sendMessage: async (chatId, content) => {
     try {
-      const response = await axiosInstance.post(`/api/messages/${chatId}`, { content });
+      if (!chatId || !content) {
+        console.error('Missing chatId or content');
+        return;
+      }
+
+      console.log('Sending message:', { chatId, content }); // Debug log
+
+      // Updated endpoint to match backend route structure
+      const response = await axiosInstance.post(`/api/chat/message`, {
+        chatId: chatId,
+        content: content
+      });
+
+      console.log('Message response:', response.data);
+
       set(state => ({
-        messages: [...state.messages, response.data]
+        messages: Array.isArray(state.messages) 
+          ? [...state.messages, response.data]
+          : [response.data]
       }));
+
       return response.data;
     } catch (error) {
-      console.log('Error sending message:', error);
-      toast.error('Failed to send message');
+      // More detailed error logging
+      console.log('Full error:', error);
+      console.log('Error response:', error.response);
+      console.log('Error sending message:', error.response?.data || error);
+      toast.error('Failed to send message: ' + (error.response?.data?.message || error.message));
       throw error;
     }
   },
@@ -72,11 +92,33 @@ export const useChatStore = create((set, get) => ({
         selectedChat: response.data // Automatically select the new chat
       }));
 
+      // Fetch messages for the new chat
+      await get().fetchMessages(response.data._id);
+
       return response.data;
     } catch (error) {
       console.error('Error creating chat:', error);
       toast.error('Failed to create chat');
       throw error;
     }
+  },
+
+  subscribeToMessages: () => {
+    const {selectedChat} = get();
+    if (!selectedChat) return;
+
+    const socket = useAuthStore.getState().socket;
+
+    socket.on("newMessage", (message) => {
+      set({
+        messages: [...get().messages, message]
+      })
+    })
+  },
+
+  unsubscribeFromMessages: () => {
+    const socket = useAuthStore.getState().socket;
+    socket.off("newMessage");
   }
+
 })); 

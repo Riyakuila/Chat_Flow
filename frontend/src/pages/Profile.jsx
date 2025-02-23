@@ -6,7 +6,7 @@ import PageContainer from '../components/PageContainer';
 import toast from 'react-hot-toast';
 
 const Profile = () => {
-  const { authUser, updateProfile } = useAuthStore();
+  const { authUser, updateProfile, updateProfileImage } = useAuthStore();
   const { theme } = useThemeStore();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
@@ -15,7 +15,7 @@ const Profile = () => {
     location: authUser?.location || '',
     website: authUser?.website || ''
   });
-  
+
   const profileImageRef = useRef(null);
   const coverImageRef = useRef(null);
 
@@ -44,16 +44,24 @@ const Profile = () => {
       return;
     }
 
-    const formData = new FormData();
-    formData.append(type === 'profile' ? 'profileImage' : 'coverImage', file);
-
     try {
-      const response = await updateProfile(formData);
+      let response;
+      if (type === 'profile') {
+        response = await updateProfileImage(file);
+      } else {
+        const formData = new FormData();
+        formData.append('coverImage', file);
+        response = await updateProfile(formData);
+      }
+
+      console.log('Upload response:', response);
+      
       if (response) {
         toast.success(`${type === 'profile' ? 'Profile' : 'Cover'} image updated successfully`);
       }
     } catch (error) {
-      console.error('Error uploading image:', error);
+      console.error('Upload error:', error);
+      console.error('Error details:', error.response?.data);
       toast.error(error.response?.data?.message || 'Error uploading image');
     }
   };
@@ -61,11 +69,7 @@ const Profile = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      console.log("Form data before sending:", formData);
-
       const response = await updateProfile(formData);
-      
-      // Update form data with response
       if (response) {
         setFormData({
           fullName: response.fullName || '',
@@ -73,10 +77,9 @@ const Profile = () => {
           location: response.location || '',
           website: response.website || ''
         });
+        setIsEditing(false);
+        toast.success('Profile updated successfully');
       }
-
-      setIsEditing(false);
-      toast.success('Profile updated successfully');
     } catch (error) {
       console.error('Error updating profile:', error);
       toast.error('Error updating profile');
@@ -93,15 +96,6 @@ const Profile = () => {
       </div>
     );
   }
-
-  // Default values for missing data
-  const defaultProfile = {
-    fullName: authUser.fullName || 'User',
-    email: authUser.email || 'No email provided',
-    profileImage: authUser.profileImage || null,
-    coverImage: authUser.coverImage || null,
-    location: authUser.location || 'Location not set',
-  };
 
   return (
     <div className="bg-base-100 text-base-content">
@@ -238,7 +232,7 @@ const Profile = () => {
                     </div>
                     <div className="flex items-center gap-2">
                       <Mail className="w-4 h-4" />
-                      <span>{defaultProfile.email}</span>
+                      <span>{authUser.email || 'No email provided'}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Calendar className="w-4 h-4" />

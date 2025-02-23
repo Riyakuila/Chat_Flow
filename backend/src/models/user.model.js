@@ -47,4 +47,5 @@ const userSchema = new mongoose.Schema({
 // Only create the text index for fullName
 userSchema.index({ fullName: 'text' });
 
-export const User = mongoose.model('User', userSchema); 
+const User = mongoose.model('User', userSchema);
+export default User; 
