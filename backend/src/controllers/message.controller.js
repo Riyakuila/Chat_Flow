@@ -1,6 +1,7 @@
 import User from "../models/user.model.js";
 import Message from "../models/message.model.js";
 import cloudinary from "cloudinary";
+import { getReceiverSocketId, io } from "../lib/soket.js";
 
 export const getUsersForSidebar = async (req, res) => {
     try {
@@ -18,53 +19,73 @@ export const getUsersForSidebar = async (req, res) => {
 
 export const getMessages = async (req, res) => {
     try {
-        const { id: userToChatId } = req.params;
-        const myId = req.user._id;
+        const { id: receiverId } = req.params;
+        const senderId = req.user._id;
 
         const messages = await Message.find({
             $or: [
-                { senderId: myId, receiverId: userToChatId },
-                { senderId: userToChatId, receiverId: myId },
+                { senderId, receiverId },
+                { senderId: receiverId, receiverId: senderId }
             ]
-        })
+        }).sort({ timestamp: 1 });
+
         res.status(200).json(messages);
     } catch (error) {
-        console.log("Error in getMessages", error.message);
+        console.error("Error in getMessages:", error);
         res.status(500).json({ error: "Internal server error" });
     }
-}
+};
 
 export const sendMessage = async (req, res) => {
     try {
-        const { id: userToChatId } = req.params;
-        const myId = req.user._id;
-        const { message, image } = req.body;
+        // Log incoming request data
+        console.log('Request body:', req.body);
+        console.log('Request params:', req.params);
+        console.log('Authenticated user:', req.user);
 
-        let imageUrl = null;
-        if (image) {
-            const uploadResponse = await cloudinary.uploader.upload(image, {
-                folder: "messages",
+        const { content } = req.body;
+        const { id: receiverId } = req.params;
+        const senderId = req.user._id;
+
+        // Validate required fields
+        if (!content || !receiverId || !senderId) {
+            console.log('Missing required fields:', { content, receiverId, senderId });
+            return res.status(400).json({ 
+                error: "Missing required fields",
+                details: { content, receiverId, senderId }
             });
-            imageUrl = uploadResponse.secure_url;
         }
 
         const newMessage = new Message({
-            senderId: myId,
-            receiverId: userToChatId,
-            message: message,
-            image: image,
+            senderId,
+            receiverId,
+            content,
+            timestamp: new Date()
         });
 
-        await newMessage.save();
+        // Log message before saving
+        console.log('Attempting to save message:', newMessage);
 
-        const receiverSocketId = getReceiverSocketId(userToChatId);
+        const savedMessage = await newMessage.save();
+        console.log('Message saved successfully:', savedMessage);
+
+        // Get receiver socket id and emit message
+        const receiverSocketId = getReceiverSocketId(receiverId);
         if (receiverSocketId) {
-            io.to(receiverSocketId).emit("newMessage", newMessage);
+            io.to(receiverSocketId).emit("newMessage", savedMessage);
+            console.log('Message emitted to socket:', receiverSocketId);
         }
-        
-        res.status(200).json({ message: "Message sent successfully" });
+
+        res.status(201).json(savedMessage);
     } catch (error) {
-        console.log("Error in sendMessage", error.message);
-        res.status(500).json({ error: "Internal server error" });
+        console.error("Detailed error in sendMessage:", {
+            message: error.message,
+            stack: error.stack,
+            details: error
+        });
+        res.status(500).json({ 
+            error: "Internal server error",
+            details: error.message
+        });
     }
-}
+};

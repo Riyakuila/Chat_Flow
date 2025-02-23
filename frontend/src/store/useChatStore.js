@@ -2,12 +2,14 @@ import { create } from 'zustand';
 import axiosInstance from '../lib/axiosInstance';
 import toast from 'react-hot-toast';
 import { useAuthStore } from './useAuthStore';
+
 export const useChatStore = create((set, get) => ({
   selectedChat: null,
   chats: [],
   messages: [],
   isLoadingChats: false,
   isLoadingMessages: false,
+  typingUsers: new Set(),
 
   // Get user's chats
   fetchChats: async () => {
@@ -31,44 +33,54 @@ export const useChatStore = create((set, get) => ({
       const response = await axiosInstance.get(`/api/messages/${chatId}`);
       set({ messages: response.data });
     } catch (error) {
-      console.log('Error fetching messages:', error);
-      toast.error('Failed to load messages');
+      console.error("Error fetching messages:", error);
     } finally {
       set({ isLoadingMessages: false });
     }
   },
 
   // Send a message
-  sendMessage: async (chatId, content) => {
+  sendMessage: async (receiverId, content) => {
     try {
-      if (!chatId || !content) {
-        console.error('Missing chatId or content');
-        return;
-      }
-
-      console.log('Sending message:', { chatId, content }); // Debug log
-
-      // Updated endpoint to match backend route structure
-      const response = await axiosInstance.post(`/api/chat/message`, {
-        chatId: chatId,
-        content: content
+      console.log('Sending message:', { receiverId, content });
+      const socket = useAuthStore.getState().socket;
+      
+      // Log socket status
+      console.log('Socket status:', {
+        exists: !!socket,
+        connected: socket?.connected,
+        id: socket?.id
       });
 
-      console.log('Message response:', response.data);
+      // Send through HTTP first
+      const response = await axiosInstance.post(`/api/messages/${receiverId}`, {
+        content
+      });
+
+      console.log('Message sent successfully:', response.data);
+
+      // Then emit through socket
+      if (socket?.connected) {
+        socket.emit("sendMessage", {
+          receiverId,
+          content,
+          _id: response.data._id
+        });
+        console.log('Message emitted through socket');
+      }
 
       set(state => ({
-        messages: Array.isArray(state.messages) 
-          ? [...state.messages, response.data]
-          : [response.data]
+        messages: [...state.messages, response.data]
       }));
 
       return response.data;
     } catch (error) {
-      // More detailed error logging
-      console.log('Full error:', error);
-      console.log('Error response:', error.response);
-      console.log('Error sending message:', error.response?.data || error);
-      toast.error('Failed to send message: ' + (error.response?.data?.message || error.message));
+      console.error("Detailed send message error:", {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+        headers: error.response?.headers
+      });
       throw error;
     }
   },
@@ -78,6 +90,9 @@ export const useChatStore = create((set, get) => ({
     set({ selectedChat: chat });
     if (chat) {
       get().fetchMessages(chat._id);
+      // Join chat room
+      const socket = useAuthStore.getState().socket;
+      socket?.emit("joinChat", chat._id);
     }
   },
 
@@ -103,22 +118,42 @@ export const useChatStore = create((set, get) => ({
     }
   },
 
-  subscribeToMessages: () => {
-    const {selectedChat} = get();
-    if (!selectedChat) return;
+  handleNewMessage: (message) => {
+    set(state => ({
+      messages: [...state.messages, message]
+    }));
+  },
 
+  setTypingStatus: (userId, isTyping) => {
+    set(state => {
+      const newTypingUsers = new Set(state.typingUsers);
+      if (isTyping) {
+        newTypingUsers.add(userId);
+      } else {
+        newTypingUsers.delete(userId);
+      }
+      return { typingUsers: newTypingUsers };
+    });
+  },
+
+  subscribeToMessages: () => {
     const socket = useAuthStore.getState().socket;
+    if (!socket) return;
 
     socket.on("newMessage", (message) => {
-      set({
-        messages: [...get().messages, message]
-      })
-    })
+      get().handleNewMessage(message);
+    });
+
+    socket.on("userTyping", ({ senderId, isTyping }) => {
+      get().setTypingStatus(senderId, isTyping);
+    });
   },
 
   unsubscribeFromMessages: () => {
     const socket = useAuthStore.getState().socket;
-    socket.off("newMessage");
-  }
+    if (!socket) return;
 
+    socket.off("newMessage");
+    socket.off("userTyping");
+  }
 })); 
