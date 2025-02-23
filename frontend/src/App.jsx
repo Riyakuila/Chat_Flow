@@ -1,5 +1,5 @@
 import React from 'react'
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import HomePage from './pages/HomePage'
 import SignupPage from './pages/SignupPage'
@@ -17,20 +17,17 @@ import { Toaster } from 'react-hot-toast'
 import Footer from './components/Footer'
 import { useThemeStore } from './store/useThemeStore'
 import Logout from './pages/Logout'
+import { useChatStore } from './store/useChatStore'
 
-
-
-const App = () => {
-  const { authUser, checkAuth, isCheckingAuth, onlineUsers } = useAuthStore();
+const AppContent = () => {
+  const location = useLocation();
+  const { authUser, checkAuth, isCheckingAuth } = useAuthStore();
   const { theme } = useThemeStore();
-
-  console.log({onlineUsers});
+  const { selectedChat } = useChatStore();
 
   useEffect(() => {
     checkAuth();
   }, [checkAuth])
-
-  console.log({authUser})
 
   if (isCheckingAuth && !authUser) {
     return (
@@ -39,6 +36,8 @@ const App = () => {
       </div>
     )
   }
+
+  const showFooter = location.pathname !== '/chat' && !selectedChat;
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -59,9 +58,15 @@ const App = () => {
         </Routes>
       </main>
 
-      <Footer />
+      {showFooter && <Footer />}
       <Toaster position="top-center" />
     </div>
+  )
+}
+
+const App = () => {
+  return (
+    <AppContent />
   )
 }
 

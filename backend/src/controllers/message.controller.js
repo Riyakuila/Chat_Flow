@@ -38,22 +38,12 @@ export const getMessages = async (req, res) => {
 
 export const sendMessage = async (req, res) => {
     try {
-        // Log incoming request data
-        console.log('Request body:', req.body);
-        console.log('Request params:', req.params);
-        console.log('Authenticated user:', req.user);
-
         const { content } = req.body;
         const { id: receiverId } = req.params;
         const senderId = req.user._id;
 
-        // Validate required fields
-        if (!content || !receiverId || !senderId) {
-            console.log('Missing required fields:', { content, receiverId, senderId });
-            return res.status(400).json({ 
-                error: "Missing required fields",
-                details: { content, receiverId, senderId }
-            });
+        if (!content || !receiverId) {
+            return res.status(400).json({ message: "Content and receiver ID are required" });
         }
 
         const newMessage = new Message({
@@ -63,29 +53,12 @@ export const sendMessage = async (req, res) => {
             timestamp: new Date()
         });
 
-        // Log message before saving
-        console.log('Attempting to save message:', newMessage);
-
         const savedMessage = await newMessage.save();
-        console.log('Message saved successfully:', savedMessage);
-
-        // Get receiver socket id and emit message
-        const receiverSocketId = getReceiverSocketId(receiverId);
-        if (receiverSocketId) {
-            io.to(receiverSocketId).emit("newMessage", savedMessage);
-            console.log('Message emitted to socket:', receiverSocketId);
-        }
-
+        
+        // Just send the response, socket emission is handled separately
         res.status(201).json(savedMessage);
     } catch (error) {
-        console.error("Detailed error in sendMessage:", {
-            message: error.message,
-            stack: error.stack,
-            details: error
-        });
-        res.status(500).json({ 
-            error: "Internal server error",
-            details: error.message
-        });
+        console.error("Error in sendMessage:", error);
+        res.status(500).json({ error: "Internal server error" });
     }
 };

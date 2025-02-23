@@ -26,7 +26,7 @@ export const getReceiverSocketId = (receiverId) => {
 }
 
 io.on("connection", (socket) => {
-    console.log("a user connected", socket.id);
+    console.log("User connected:", socket.id);
 
     const userId = socket.handshake.query.userId;
     if (userId) {
@@ -40,33 +40,30 @@ io.on("connection", (socket) => {
         console.log("User joined chat:", chatId);
     });
 
-    // Handle new message
+    // Handle new message - ONLY emit to receiver, don't save to DB
     socket.on("sendMessage", async (messageData) => {
         try {
-            const { receiverId, content } = messageData;
+            const { receiverId, content, _id } = messageData;
             
-            // Save message to database
-            const newMessage = new Message({
-                senderId: userId,
-                receiverId: receiverId,
-                content: content,
-                timestamp: new Date()
-            });
-            await newMessage.save();
-
             // Get receiver's socket id
             const receiverSocketId = userSocketMap[receiverId];
-
-            // Emit message to both sender and receiver
+            
+            // Only emit to receiver if they're online
             if (receiverSocketId) {
-                io.to(receiverSocketId).emit("newMessage", newMessage);
+                const messageWithSender = {
+                    _id,
+                    senderId: userId,
+                    receiverId,
+                    content,
+                    timestamp: new Date(),
+                    senderInfo: await User.findById(userId).select('username profilePic')
+                };
+                
+                io.to(receiverSocketId).emit("newMessage", messageWithSender);
             }
-            socket.emit("messageSent", newMessage);
-
-            console.log("Message sent:", newMessage);
         } catch (error) {
-            console.error("Error sending message:", error);
-            socket.emit("messageError", { error: "Failed to send message" });
+            console.error("Error in socket message:", error);
+            socket.emit("messageError", { error: "Failed to process message" });
         }
     });
 

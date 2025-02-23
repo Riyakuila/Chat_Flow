@@ -18,7 +18,10 @@ const ChatPage = () => {
     setSelectedChat,
     createChat,
     subscribeToMessages,
-    unsubscribeFromMessages
+    unsubscribeFromMessages,
+    handleNewMessage,
+    restoreChat,
+    unreadMessages
   } = useChatStore();
   
   const [message, setMessage] = useState('');
@@ -28,14 +31,18 @@ const ChatPage = () => {
   const [allUsers, setAllUsers] = useState([]);
 
   useEffect(() => {
+    // Restore chat state on component mount
+    restoreChat();
+    
+    // Set up message subscription
     subscribeToMessages();
-    fetchChats();
+
+    // Cleanup on unmount
     return () => {
-      if (typeof unsubscribeFromMessages === 'function') {
-        unsubscribeFromMessages();
-      }
+      console.log("Cleaning up message subscription");
+      unsubscribeFromMessages();
     };
-  }, [fetchChats, subscribeToMessages]);
+  }, [subscribeToMessages, unsubscribeFromMessages, restoreChat]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -75,12 +82,17 @@ const ChatPage = () => {
     console.log('Messages:', messages);
   }, [authUser, allUsers, chats, selectedChat, messages]);
 
+  // Debug log to check unread messages
+  useEffect(() => {
+    console.log("Current unread messages:", unreadMessages);
+  }, [unreadMessages]);
+
   const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!message.trim() || !selectedChat) return;
 
     try {
-      await sendMessage(selectedChat._id, message);
+      await sendMessage(selectedChat.participantId, message);
       setMessage('');
     } catch (error) {
       console.error('Failed to send message:', error);
@@ -112,6 +124,20 @@ const ChatPage = () => {
     if (!chat || !authUser || !allUsers) return null;
     const otherUser = allUsers.find(user => user._id === chat.participantId);
     return otherUser || null;
+  };
+
+  // Helper function to safely format date
+  const formatMessageTime = (timestamp) => {
+    try {
+      if (!timestamp) return '';
+      const date = new Date(timestamp);
+      // Check if date is valid
+      if (isNaN(date.getTime())) return '';
+      return format(date, 'HH:mm');
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return '';
+    }
   };
 
   return (
@@ -163,52 +189,64 @@ const ChatPage = () => {
             </div>
           ) : (
             <div className="space-y-1">
-              {filteredUsers.map((user) => (
-                <div 
-                  key={user._id}
-                  onClick={() => startNewChat(user._id)}
-                  className="flex items-center gap-3 p-4 hover:bg-base-200 cursor-pointer transition-colors relative"
-                >
-                  {/* User Avatar with Online Status */}
-                  <div className="relative">
-                    <div className="w-12 h-12 rounded-full bg-base-300 flex items-center justify-center overflow-hidden">
-                      {user.profilePic ? (
-                        <img 
-                          src={user.profilePic} 
-                          alt={user.fullName}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <span className="text-xl font-bold text-base-content/40">
-                          {user.fullName.charAt(0)}
-                        </span>
+              {filteredUsers.map((user) => {
+                const unreadCount = unreadMessages[user._id] || 0; // Get unread count
+                console.log(`Unread messages for ${user.fullName}:`, unreadCount); // Debug log
+
+                return (
+                  <div 
+                    key={user._id}
+                    onClick={() => startNewChat(user._id)}
+                    className="flex items-center gap-3 p-4 hover:bg-base-200 cursor-pointer transition-colors relative"
+                  >
+                    {/* User Avatar with Online Status */}
+                    <div className="relative">
+                      <div className="w-12 h-12 rounded-full bg-base-300 flex items-center justify-center overflow-hidden">
+                        {user.profilePic ? (
+                          <img 
+                            src={user.profilePic} 
+                            alt={user.fullName}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <span className="text-xl font-bold text-base-content/40">
+                            {user.fullName.charAt(0)}
+                          </span>
+                        )}
+                      </div>
+                      {/* Online Status Indicator */}
+                      {user.isOnline && (
+                        <div className="absolute -top-1 -right-1">
+                          <Circle className="w-3 h-3 fill-green-500 text-green-500" />
+                        </div>
                       )}
                     </div>
-                    {/* Online Status Indicator */}
-                    {user.isOnline && (
-                      <div className="absolute -top-1 -right-1">
-                        <Circle className="w-3 h-3 fill-green-500 text-green-500" />
+
+                    {/* User Info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between">
+                        <h3 className="font-medium truncate">
+                          {user.fullName}
+                        </h3>
+                        <span className="text-xs text-base-content/50">
+                          {user.isOnline ? (
+                            <span className="text-green-500">Active now</span>
+                          ) : (
+                            'Offline'
+                          )}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Unread Count Indicator */}
+                    {unreadCount > 0 && (
+                      <div className="absolute top-1 right-1 bg-purple-500 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow-lg">
+                        {unreadCount}
                       </div>
                     )}
                   </div>
-
-                  {/* User Info */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between">
-                      <h3 className="font-medium truncate">
-                        {user.fullName}
-                      </h3>
-                      <span className="text-xs text-base-content/50">
-                        {user.isOnline ? (
-                          <span className="text-green-500">Active now</span>
-                        ) : (
-                          'Offline'
-                        )}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
@@ -281,7 +319,7 @@ const ChatPage = () => {
                   >
                     <p className="mb-1">{msg.content}</p>
                     <p className="text-xs opacity-70 text-right">
-                      {format(new Date(msg.createdAt), 'HH:mm')}
+                      {formatMessageTime(msg.createdAt || msg.timestamp)}
                     </p>
                   </div>
                 </div>
