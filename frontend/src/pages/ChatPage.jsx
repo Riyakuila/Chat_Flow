@@ -4,6 +4,7 @@ import { useAuthStore } from '../store/useAuthStore';
 import { useChatStore } from '../store/useChatStore';
 import { format } from 'date-fns';
 import axiosInstance from '../lib/axiosInstance';
+import EmojiPicker from 'emoji-picker-react';
 
 const ChatPage = () => {
   const { authUser } = useAuthStore();
@@ -29,6 +30,8 @@ const ChatPage = () => {
   const messagesEndRef = useRef(null);
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [allUsers, setAllUsers] = useState([]);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const emojiPickerRef = useRef(null);
 
   useEffect(() => {
     // Restore chat state on component mount
@@ -87,15 +90,35 @@ const ChatPage = () => {
     console.log("Current unread messages:", unreadMessages);
   }, [unreadMessages]);
 
+  // Add click outside handler
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (emojiPickerRef.current && !emojiPickerRef.current.contains(event.target)) {
+        setShowEmojiPicker(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   const handleSendMessage = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     if (!message.trim() || !selectedChat) return;
 
     try {
       await sendMessage(selectedChat.participantId, message);
       setMessage('');
+      setShowEmojiPicker(false);
     } catch (error) {
       console.error('Failed to send message:', error);
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
     }
   };
 
@@ -138,6 +161,11 @@ const ChatPage = () => {
       console.error('Error formatting date:', error);
       return '';
     }
+  };
+
+  const onEmojiClick = (emojiObject, event) => {
+    event.preventDefault(); // Prevent any default behavior
+    setMessage(prevMessage => prevMessage + emojiObject.emoji);
   };
 
   return (
@@ -313,7 +341,7 @@ const ChatPage = () => {
                   <div
                     className={`max-w-[75%] break-words rounded-lg px-4 py-2 ${
                       msg.senderId === authUser?._id
-                        ? 'bg-purple-600 text-white rounded-br-none'
+                        ? 'bg-purple-500 text-white rounded-br-none'
                         : 'bg-base-200 rounded-bl-none'
                     }`}
                   >
@@ -333,11 +361,36 @@ const ChatPage = () => {
           </div>
 
           {/* Message Input */}
-          <div className="p-4">
+          <div className="p-4 relative">
             <form onSubmit={handleSendMessage} className="flex items-center gap-2">
-              <button type="button" className="btn btn-ghost btn-circle btn-sm">
-                <Smile className="w-5 h-5" />
-              </button>
+              <div className="relative">
+                <button 
+                  type="button" 
+                  className="btn btn-ghost btn-circle btn-sm"
+                  onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                >
+                  <Smile className="w-5 h-5" />
+                </button>
+                
+                {showEmojiPicker && (
+                  <div ref={emojiPickerRef} className="absolute bottom-12 left-0 z-50">
+                    <EmojiPicker
+                      onEmojiClick={onEmojiClick}
+                      width={300}
+                      height={400}
+                      lazyLoadEmojis={true}
+                      searchDisabled={false}
+                      previewConfig={{ showPreview: false }}
+                      skinTonesDisabled={true}
+                      searchPlaceHolder="Search emoji..."
+                      categories={['smileys_people', 'animals_nature', 'food_drink', 'travel_places', 'activities', 'objects', 'symbols', 'flags']}
+                      suggestedEmojisMode="recent"
+                      autoFocusSearch={false}
+                      onEnterKeyPress={() => {}}
+                    />
+                  </div>
+                )}
+              </div>
               <button type="button" className="btn btn-ghost btn-circle btn-sm">
                 <Paperclip className="w-5 h-5" />
               </button>
@@ -347,6 +400,7 @@ const ChatPage = () => {
                 onChange={(e) => setMessage(e.target.value)}
                 placeholder="Type a message..."
                 className="flex-1 input input-bordered focus:outline-none"
+                onKeyDown={handleKeyDown}
               />
               <button
                 type="submit"
