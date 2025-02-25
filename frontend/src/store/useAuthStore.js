@@ -10,6 +10,7 @@ export const useAuthStore = create((set, get) => ({
   isUpdatingProfile: false,
   isCheckingAuth: true,
   socket: null,
+  onlineUsers: [],
 
   checkAuth: async () => {
     try {
@@ -41,20 +42,14 @@ export const useAuthStore = create((set, get) => ({
     }
   },
 
-  logout: async () => {
-    try {
-        await axiosInstance.post('/api/auth/logout');
-        set({ authUser: null });
-        toast.success("Logged out successfully");
-        get().disconnectFromSocket();
-        const { authUser } = get();
-        if (authUser) {
-          get().socket.emit('setUserOffline', authUser._id);
-        }
-    } catch (error) {
-        console.log("Error logging out", error);
-        toast.error("Error logging out");
+  logout: () => {
+    const { socket } = get();
+    if (socket) {
+      socket.emit("logout");
+      socket.disconnect();
     }
+    set({ authUser: null, socket: null, onlineUsers: [] });
+    localStorage.removeItem('user-chats');
   },
 
   login: async (formData) => {
@@ -266,9 +261,21 @@ export const useAuthStore = create((set, get) => ({
   },
 
   setAuthUser: (user) => {
-    set({ authUser: user });
-    if (user && get().socket) {
-      get().socket.emit('setUserOnline', user._id);
+    if (user?._id) {
+      const socket = io("http://localhost:3000", {
+        query: { userId: user._id }
+      });
+
+      socket.on("connect", () => {
+        console.log("Socket connected");
+      });
+
+      socket.on("getOnlineUsers", (users) => {
+        console.log("Online users updated:", users);
+        set({ onlineUsers: users });
+      });
+
+      set({ authUser: user, socket });
     }
   },
 
@@ -293,6 +300,22 @@ export const useAuthStore = create((set, get) => ({
         }));
       }
     });
+  },
+
+  initSocket: (userId) => {
+    const socket = io("http://localhost:5001", {
+      query: { userId },
+    });
+    
+    socket.on("connect", () => {
+      console.log("Socket connected");
+    });
+
+    socket.on("connect_error", (error) => {
+      console.error("Socket connection error:", error);
+    });
+
+    set({ socket });
   },
 }))
 

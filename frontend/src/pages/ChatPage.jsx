@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Search, Menu, MoreVertical, Phone, Video, Send, Smile, Paperclip, Circle, MessageCircle } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
 import { useChatStore } from '../store/useChatStore';
@@ -7,7 +8,8 @@ import axiosInstance from '../lib/axiosInstance';
 import EmojiPicker from 'emoji-picker-react';
 
 const ChatPage = () => {
-  const { authUser } = useAuthStore();
+  const navigate = useNavigate();
+  const { authUser, socket, onlineUsers } = useAuthStore();
   const { 
     chats, 
     messages, 
@@ -27,11 +29,68 @@ const ChatPage = () => {
   
   const [message, setMessage] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
-  const messagesEndRef = useRef(null);
-  const [onlineUsers, setOnlineUsers] = useState([]);
-  const [allUsers, setAllUsers] = useState([]);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const emojiPickerRef = useRef(null);
+  const messagesEndRef = useRef(null);
+  const [allUsers, setAllUsers] = useState([]);
+
+  const initiateCall = (isVideo = false) => {
+    if (!selectedChat || !socket) {
+      console.log('No selected chat or socket connection');
+      return;
+    }
+
+    console.log('Initiating call:', {
+      receiverId: selectedChat.participantId,
+      isVideo,
+      from: authUser._id,
+      name: authUser.fullName
+    });
+
+    // Store call data
+    const callData = {
+      receiverId: selectedChat.participantId,
+      isVideo,
+      isInitiator: true,
+      from: authUser._id,
+      name: selectedChat.participant?.fullName || 'User',
+      receiverName: selectedChat.participant?.fullName || 'User'
+    };
+
+    try {
+      // Save call data to localStorage
+      localStorage.setItem('callData', JSON.stringify(callData));
+      
+      // Navigate to call page
+      navigate('/call');
+    } catch (error) {
+      console.error('Error initiating call:', error);
+    }
+  };
+
+  // Add socket listener for incoming calls
+  useEffect(() => {
+    if (!socket) return;
+
+    socket.on('callIncoming', (data) => {
+      console.log('Incoming call:', data);
+      try {
+        const callData = {
+          ...data,
+          isInitiator: false,
+          receiverId: data.from // The caller's ID becomes the receiver ID for the callee
+        };
+        localStorage.setItem('callData', JSON.stringify(callData));
+        navigate('/call');
+      } catch (error) {
+        console.error('Error handling incoming call:', error);
+      }
+    });
+
+    return () => {
+      socket.off('callIncoming');
+    };
+  }, [socket, navigate]);
 
   useEffect(() => {
     // Restore chat state on component mount
@@ -168,6 +227,11 @@ const ChatPage = () => {
     setMessage(prevMessage => prevMessage + emojiObject.emoji);
   };
 
+  // Function to check if a user is online
+  const isUserOnline = (userId) => {
+    return onlineUsers.includes(userId);
+  };
+
   return (
     <div className="h-screen pt-16 flex bg-base-100">
       {/* Sidebar */}
@@ -243,7 +307,7 @@ const ChatPage = () => {
                         )}
                       </div>
                       {/* Online Status Indicator */}
-                      {user.isOnline && (
+                      {isUserOnline(user._id) && (
                         <div className="absolute -top-1 -right-1">
                           <Circle className="w-3 h-3 fill-green-500 text-green-500" />
                         </div>
@@ -257,7 +321,7 @@ const ChatPage = () => {
                           {user.fullName}
                         </h3>
                         <span className="text-xs text-base-content/50">
-                          {user.isOnline ? (
+                          {isUserOnline(user._id) ? (
                             <span className="text-green-500">Active now</span>
                           ) : (
                             'Offline'
@@ -301,7 +365,7 @@ const ChatPage = () => {
                     </span>
                   )}
                 </div>
-                {getOtherUser(selectedChat)?.isOnline && (
+                {isUserOnline(getOtherUser(selectedChat)?._id) && (
                   <div className="absolute -top-1 -right-1">
                     <Circle className="w-3 h-3 fill-green-500 text-green-500" />
                   </div>
@@ -312,15 +376,23 @@ const ChatPage = () => {
                   {getOtherUser(selectedChat)?.fullName}
                 </h3>
                 <p className="text-xs text-gray-500">
-                  {getOtherUser(selectedChat)?.isOnline ? 'Online' : 'Offline'}
+                  {isUserOnline(getOtherUser(selectedChat)?._id) ? 'Online' : 'Offline'}
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-4">
-              <button className="btn btn-ghost btn-sm">
+              <button 
+                className="btn btn-ghost btn-sm"
+                onClick={() => initiateCall(false)}
+                disabled={!selectedChat || !socket}
+              >
                 <Phone className="w-5 h-5" />
               </button>
-              <button className="btn btn-ghost btn-sm">
+              <button 
+                className="btn btn-ghost btn-sm"
+                onClick={() => initiateCall(true)}
+                disabled={!selectedChat || !socket}
+              >
                 <Video className="w-5 h-5" />
               </button>
             </div>

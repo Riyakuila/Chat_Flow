@@ -18,6 +18,7 @@ import Footer from './components/Footer'
 import { useThemeStore } from './store/useThemeStore'
 import Logout from './pages/Logout'
 import { useChatStore } from './store/useChatStore'
+import CallPage from './pages/CallPage'
 
 const AppContent = () => {
   const location = useLocation();
@@ -55,6 +56,7 @@ const AppContent = () => {
           <Route path='/about' element={<About />} />
           <Route path='/contact' element={<Contact />} />
           <Route path='/logout' element={authUser ? <Logout /> : <Navigate to='/' />} />
+          <Route path="/call" element={<CallPage />} />
         </Routes>
       </main>
 

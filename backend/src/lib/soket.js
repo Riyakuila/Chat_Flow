@@ -18,21 +18,109 @@ const io = new Server(server, {
     transports: ['websocket', 'polling']
 });
 
-//used to store online users
-const userSocketMap = {};
+const userSocketMap = new Map(); // Using Map instead of object for better handling
 
 export const getReceiverSocketId = (receiverId) => {
-    return userSocketMap[receiverId];
+    return userSocketMap.get(receiverId);
 }
 
 io.on("connection", (socket) => {
-    console.log("User connected:", socket.id);
-
     const userId = socket.handshake.query.userId;
+    console.log("User connected:", userId);
+
     if (userId) {
-        userSocketMap[userId] = socket.id;
-        io.emit("getOnlineUsers", Object.keys(userSocketMap));
+        // Store user's socket
+        userSocketMap.set(userId, socket.id);
+        // Broadcast updated online users
+        io.emit("getOnlineUsers", Array.from(userSocketMap.keys()));
     }
+
+    // Add ping/pong mechanism to check active connections
+    const pingInterval = setInterval(() => {
+        socket.emit("ping");
+    }, 5000);
+
+    socket.on("pong", () => {
+        // User is still connected
+        console.log("Pong received from user:", userId);
+    });
+
+    socket.on("disconnect", () => {
+        console.log("User disconnected:", userId);
+        clearInterval(pingInterval);
+        
+        if (userId) {
+            // Remove user from online list
+            userSocketMap.delete(userId);
+            // Broadcast updated online users
+            io.emit("getOnlineUsers", Array.from(userSocketMap.keys()));
+        }
+    });
+
+    socket.on("error", () => {
+        console.log("Socket error for user:", userId);
+        clearInterval(pingInterval);
+        
+        if (userId) {
+            userSocketMap.delete(userId);
+            io.emit("getOnlineUsers", Array.from(userSocketMap.keys()));
+        }
+    });
+
+    // Force disconnect after timeout
+    socket.on("disconnecting", () => {
+        console.log("User disconnecting:", userId);
+        if (userId) {
+            userSocketMap.delete(userId);
+            io.emit("getOnlineUsers", Array.from(userSocketMap.keys()));
+        }
+    });
+
+    // Call signaling
+    socket.on("callUser", (data) => {
+        console.log("Call request received:", data);
+        const receiverSocketId = userSocketMap.get(data.userToCall);
+        
+        if (receiverSocketId) {
+            console.log("Emitting call to receiver:", receiverSocketId);
+            io.to(receiverSocketId).emit("callIncoming", {
+                signal: data.signalData,
+                from: data.from,
+                name: data.name,
+                isVideo: data.isVideo
+            });
+        } else {
+            console.log("Receiver not found:", data.userToCall);
+            socket.emit("callError", { 
+                message: "User is not online",
+                error: "USER_OFFLINE"
+            });
+        }
+    });
+
+    socket.on("answerCall", (data) => {
+        console.log("Call answered:", data);
+        const receiverSocketId = userSocketMap.get(data.to);
+        if (receiverSocketId) {
+            io.to(receiverSocketId).emit("callAccepted", data.signal);
+        }
+    });
+
+    socket.on("declineCall", (data) => {
+        console.log("Call declined:", data);
+        const receiverSocketId = userSocketMap.get(data.to);
+        if (receiverSocketId) {
+            io.to(receiverSocketId).emit("callDeclined");
+        }
+    });
+
+    socket.on("endCall", (userId) => {
+        console.log("Call ended by:", socket.id);
+        const receiverSocketId = userSocketMap.get(userId);
+        if (receiverSocketId) {
+            io.to(receiverSocketId).emit("callEnded");
+        }
+    });
 
     // Handle joining a chat
     socket.on("joinChat", (chatId) => {
@@ -46,7 +134,7 @@ io.on("connection", (socket) => {
             const { receiverId, content, _id } = messageData;
             
             // Get receiver's socket id
-            const receiverSocketId = userSocketMap[receiverId];
+            const receiverSocketId = userSocketMap.get(receiverId);
             
             // Only emit to receiver if they're online
             if (receiverSocketId) {
@@ -69,30 +157,13 @@ io.on("connection", (socket) => {
 
     // Handle typing status
     socket.on("typing", (data) => {
-        const receiverSocketId = userSocketMap[data.receiverId];
+        const receiverSocketId = userSocketMap.get(data.receiverId);
         if (receiverSocketId) {
             io.to(receiverSocketId).emit("userTyping", {
                 senderId: userId,
                 isTyping: data.isTyping
             });
         }
-    });
-
-    socket.on("disconnect", async () => {
-        console.log("user disconnected", socket.id);
-        if (userId) {
-            delete userSocketMap[userId];
-            await User.findByIdAndUpdate(userId, { 
-                isOnline: false,
-                lastSeen: new Date()
-            });
-            io.emit("getOnlineUsers", Object.keys(userSocketMap));
-            io.emit("userOffline", userId);
-        }
-    });
-
-    socket.on("error", (error) => {
-        console.error("Socket error:", error);
     });
 
     // Handle user coming online
@@ -126,6 +197,27 @@ io.on("connection", (socket) => {
             console.error('Error setting user offline:', error);
         }
     });
+
+    // Handle manual logout
+    socket.on("logout", () => {
+        console.log("User logged out:", userId);
+        if (userId) {
+            userSocketMap.delete(userId);
+            io.emit("getOnlineUsers", Array.from(userSocketMap.keys()));
+        }
+    });
 });
+
+// Clean up function to periodically check for stale connections
+setInterval(() => {
+    for (const [userId, socketId] of userSocketMap.entries()) {
+        const socket = io.sockets.sockets.get(socketId);
+        if (!socket || !socket.connected) {
+            console.log("Cleaning up stale connection for user:", userId);
+            userSocketMap.delete(userId);
+            io.emit("getOnlineUsers", Array.from(userSocketMap.keys()));
+        }
+    }
+}, 10000);
 
 export {io, server, app};
