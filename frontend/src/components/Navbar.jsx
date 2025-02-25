@@ -1,11 +1,25 @@
 import { Link } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore";
-import { LogOut, Settings, User, BarChart2 } from "lucide-react";
+import { LogOut, Settings, User, BarChart2, Palette } from "lucide-react";
 import Logo from "../assets/logo.png";
-import ThemeSelector from "./ThemeSelector";
+import { useState, useEffect } from 'react';
 
 const Navbar = () => {
   const { logout, authUser } = useAuthStore();
+  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
+
+  const themes = [
+    "light", "dark", "cupcake", "bumblebee", "emerald", "corporate",
+    "synthwave", "retro", "cyberpunk", "valentine", "halloween",
+    "garden", "forest", "aqua", "lofi", "pastel", "fantasy",
+    "wireframe", "black", "luxury", "dracula", "cmyk", "autumn",
+    "business", "acid", "lemonade", "night", "coffee", "winter"
+  ];
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
 
   return (
     <header
@@ -33,7 +47,34 @@ const Navbar = () => {
           </div>
 
           <div className="flex items-center gap-3">
-            <ThemeSelector />
+            <div className="dropdown dropdown-end">
+              <label tabIndex={0} className="btn btn-ghost btn-circle">
+                <Palette className="w-5 h-5" />
+              </label>
+              <ul tabIndex={0} className="dropdown-content menu p-3 bg-base-200 rounded-box w-56 mt-4 max-h-[70vh] overflow-y-auto shadow-2xl gap-2 grid">
+                {themes.map((themeName) => (
+                  <li key={themeName}>
+                    <div
+                      className={`w-full hover:bg-base-100 rounded-lg ${
+                        theme === themeName ? 'outline outline-2 outline-primary' : ''
+                      }`}
+                      onClick={() => setTheme(themeName)}
+                      data-theme={themeName}
+                    >
+                      <div className="px-4 py-2 flex items-center justify-between gap-4">
+                        <span className="font-medium capitalize">{themeName}</span>
+                        <div className="flex gap-1.5">
+                          <div className="w-2 h-6 rounded bg-primary"></div>
+                          <div className="w-2 h-6 rounded bg-secondary"></div>
+                          <div className="w-2 h-6 rounded bg-accent"></div>
+                          <div className="w-2 h-6 rounded bg-neutral"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
 
             {authUser ? (
               <>

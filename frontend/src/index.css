@@ -1,2 +1,147 @@
 @import "tailwindcss";
 @plugin "daisyui";
+
+@plugin "daisyui/theme" {
+    name: light;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+@plugin "daisyui/theme" {
+    name: dark;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+@plugin "daisyui/theme" {
+    name: cyberpunk;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
+}
+
+@plugin "daisyui/theme" {
+    name: wireframe;
+    font-family: 'IBM Plex Mono', 'Courier New', monospace;
+}
+
+@plugin "daisyui/theme" {
+    name: valentine;
+    font-family: 'Quicksand', 'Helvetica', sans-serif;
+}
+
+@plugin "daisyui/theme" {
+    name: cupcake;
+    font-family: 'Nunito', 'Helvetica', sans-serif;
+}
+
+@plugin "daisyui/theme" {
+    name: bumblebee;
+    font-family: 'Poppins', system-ui, sans-serif;
+}
+
+@plugin "daisyui/theme" {
+    name: emerald;
+    font-family: 'Inter', system-ui, sans-serif;
+}
+
+@plugin "daisyui/theme" {
+    name: corporate;
+    font-family: 'Roboto', 'Arial', sans-serif;
+}
+
+@plugin "daisyui/theme" {
+    name: synthwave;
+    font-family: 'Orbitron', 'Impact', sans-serif;
+}
+
+@plugin "daisyui/theme" {
+    name: retro;
+    font-family: 'DM Sans', 'Arial Narrow', sans-serif;
+}
+
+@plugin "daisyui/theme" {
+    name: halloween;
+    font-family: 'Creepster', 'Impact', cursive;
+}
+
+@plugin "daisyui/theme" {
+    name: garden;
+    font-family: 'Playfair Display', 'Georgia', serif;
+}
+
+@plugin "daisyui/theme" {
+    name: forest;
+    font-family: 'Crimson Text', 'Georgia', serif;
+}
+
+@plugin "daisyui/theme" {
+    name: aqua;
+    font-family: 'Ubuntu', 'Trebuchet MS', sans-serif;
+}
+
+@plugin "daisyui/theme" {
+    name: lofi;
+    font-family: 'Space Mono', 'Consolas', monospace;
+}
+
+@plugin "daisyui/theme" {
+    name: pastel;
+    font-family: 'Montserrat', 'Helvetica Neue', sans-serif;
+}
+
+@plugin "daisyui/theme" {
+    name: fantasy;
+    font-family: 'MedievalSharp', 'Papyrus', fantasy;
+}
+
+@plugin "daisyui/theme" {
+    name: black;
+    font-family: 'Roboto Condensed', 'Arial', sans-serif;
+}
+
+@plugin "daisyui/theme" {
+    name: luxury;
+    font-family: 'Playfair Display', 'Didot', serif;
+}
+
+@plugin "daisyui/theme" {
+    name: dracula;
+    font-family: 'Fira Code', 'Menlo', monospace;
+}
+
+@plugin "daisyui/theme" {
+    name: cmyk;
+    font-family: 'Work Sans', 'Franklin Gothic Medium', sans-serif;
+}
+
+@plugin "daisyui/theme" {
+    name: autumn;
+    font-family: 'Merriweather', 'Georgia', serif;
+}
+
+@plugin "daisyui/theme" {
+    name: business;
+    font-family: 'Lato', 'Helvetica Neue', sans-serif;
+}
+
+@plugin "daisyui/theme" {
+    name: acid;
+    font-family: 'VT323', 'Courier', monospace;
+}
+
+@plugin "daisyui/theme" {
+    name: lemonade;
+    font-family: 'Josefin Sans', 'Helvetica Neue', sans-serif;
+}
+
+@plugin "daisyui/theme" {
+    name: night;
+    font-family: 'Source Code Pro', 'Monaco', monospace;
+}
+
+@plugin "daisyui/theme" {
+    name: coffee;
+    font-family: 'Bitter', 'Georgia', serif;
+}
+
+@plugin "daisyui/theme" {
+    name: winter;
+    font-family: 'Open Sans', 'Helvetica Neue', sans-serif;
+}
