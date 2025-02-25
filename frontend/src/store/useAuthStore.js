@@ -10,7 +10,6 @@ export const useAuthStore = create((set, get) => ({
   isUpdatingProfile: false,
   isCheckingAuth: true,
   socket: null,
-  onlineUsers: [],
 
   checkAuth: async () => {
     try {
@@ -42,14 +41,20 @@ export const useAuthStore = create((set, get) => ({
     }
   },
 
-  logout: () => {
-    const { socket } = get();
-    if (socket) {
-      socket.emit("logout");
-      socket.disconnect();
+  logout: async () => {
+    try {
+        await axiosInstance.post('/api/auth/logout');
+        set({ authUser: null });
+        toast.success("Logged out successfully");
+        get().disconnectFromSocket();
+        const { authUser } = get();
+        if (authUser) {
+          get().socket.emit('setUserOffline', authUser._id);
+        }
+    } catch (error) {
+        console.log("Error logging out", error);
+        toast.error("Error logging out");
     }
-    set({ authUser: null, socket: null, onlineUsers: [] });
-    localStorage.removeItem('user-chats');
   },
 
   login: async (formData) => {
@@ -261,21 +266,25 @@ export const useAuthStore = create((set, get) => ({
   },
 
   setAuthUser: (user) => {
+    set({ authUser: user });
     if (user?._id) {
-      const socket = io("http://localhost:3000", {
-        query: { userId: user._id }
+      const socket = io("http://localhost:5001", {
+        query: { userId: user._id },
       });
-
+      
       socket.on("connect", () => {
-        console.log("Socket connected");
+        console.log("Socket connected successfully");
       });
 
-      socket.on("getOnlineUsers", (users) => {
-        console.log("Online users updated:", users);
-        set({ onlineUsers: users });
+      socket.on("connect_error", (error) => {
+        console.error("Socket connection error:", error);
       });
 
-      set({ authUser: user, socket });
+      socket.on("disconnect", () => {
+        console.log("Socket disconnected");
+      });
+
+      set({ socket });
     }
   },
 
