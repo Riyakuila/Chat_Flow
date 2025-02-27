@@ -9,7 +9,7 @@ export const useThemeStore = create((set) => ({
   },
 }));
 
-// Initialize theme on load
+
 const savedTheme = localStorage.getItem('theme') || 'light';
 document.querySelector('html').setAttribute('data-theme', savedTheme);
 document.documentElement.setAttribute('data-theme', savedTheme); 

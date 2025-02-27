@@ -45,7 +45,7 @@ const HomePage = () => {
 
   return (
     <div className="min-h-screen pt-10">
-      {/* Hero Section */}
+     
       <section className="py-20 px-4">
         <div className="container mx-auto max-w-6xl">
           <div className="grid lg:grid-cols-2 gap-10 items-center">
@@ -86,7 +86,7 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Features Grid with Images */}
+     
       <section className="py-20 px-4 bg-base-200/50">
         <div className="container mx-auto">
           <h2 className="text-3xl font-bold text-center mb-12">
@@ -127,7 +127,7 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Additional Feature Section */}
+    
       <section className="py-20 px-4">
         <div className="container mx-auto max-w-6xl">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
@@ -164,7 +164,7 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Trusted Users Section - Now under Experience section */}
+
       <section className="py-16 px-4 bg-base-200/50">
         <div className="container mx-auto">
           <div className="text-center max-w-3xl mx-auto">
@@ -179,11 +179,11 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Stats Section */}
+      
       <section className="py-20 px-4">
         <div className="container mx-auto">
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {/* Active Users Card */}
+           
             <div className="card bg-base-100 hover:shadow-lg transition-all duration-300">
               <figure className="px-4 pt-4">
                 <img 
@@ -200,7 +200,7 @@ const HomePage = () => {
               </div>
             </div>
 
-            {/* Messages Card */}
+           
             <div className="card bg-base-100 hover:shadow-lg transition-all duration-300">
               <figure className="px-4 pt-4">
                 <img 
@@ -217,7 +217,7 @@ const HomePage = () => {
               </div>
             </div>
 
-            {/* Uptime Card */}
+           
             <div className="card bg-base-100 hover:shadow-lg transition-all duration-300">
               <figure className="px-4 pt-4">
                 <img 
@@ -237,7 +237,7 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* CTA Section */}
+    
       <section className="py-20 px-4 bg-base-200/50">
         <div className="container mx-auto text-center max-w-3xl">
           <h2 className="text-3xl font-bold mb-6">

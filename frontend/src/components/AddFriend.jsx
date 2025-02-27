@@ -19,7 +19,7 @@ const AddFriend = () => {
     setIsLoading(true);
     try {
       const response = await axiosInstance.get(`/api/users/search?query=${searchQuery}`);
-      // Filter out the current user from results
+      
       const filteredResults = response.data.filter(user => user._id !== authUser._id);
       setSearchResults(filteredResults);
     } catch (error) {
@@ -34,8 +34,8 @@ const AddFriend = () => {
     try {
       await createChat(userId);
       toast.success('Chat created successfully!');
-      setSearchResults([]); // Clear results
-      setSearchQuery(''); // Clear search
+      setSearchResults([]); 
+      setSearchQuery('');
     } catch (error) {
       toast.error('Failed to create chat');
     }

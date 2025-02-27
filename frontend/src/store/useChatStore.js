@@ -13,9 +13,9 @@ export const useChatStore = create(
       isLoadingChats: false,
       isLoadingMessages: false,
       typingUsers: new Set(),
-      unreadMessages: {}, // { userId: count }
+      unreadMessages: {}, 
 
-      // Get user's chats
+      
       fetchChats: async () => {
         set({ isLoadingChats: true });
         try {
@@ -30,7 +30,7 @@ export const useChatStore = create(
         }
       },
 
-      // Get messages for a specific chat
+      
       fetchMessages: async (participantId) => {
         try {
           set({ isLoadingMessages: true });
@@ -43,23 +43,22 @@ export const useChatStore = create(
         }
       },
 
-      // Send a message
+
       sendMessage: async (receiverId, content) => {
         try {
           console.log('Sending message:', { receiverId, content });
           const socket = useAuthStore.getState().socket;
           
-          // Send through HTTP only
+  
           const response = await axiosInstance.post(`/api/messages/${receiverId}`, {
             content
           });
 
-          // Add message to state only once
           set(state => ({
             messages: [...state.messages, response.data]
           }));
 
-          // Emit through socket for the receiver
+          
           if (socket?.connected) {
             socket.emit("sendMessage", {
               receiverId,
@@ -75,13 +74,12 @@ export const useChatStore = create(
         }
       },
 
-      // Select a chat
       setSelectedChat: async (chat) => {
         console.log("Setting selected chat:", chat);
         set({ selectedChat: chat });
         
         if (chat) {
-          // Clear unread messages when selecting chat
+        
           get().clearUnreadMessages(chat.participantId);
           await get().fetchMessages(chat.participantId);
           
@@ -90,18 +88,17 @@ export const useChatStore = create(
         }
       },
 
-      // Create a new chat
       createChat: async (userId) => {
         try {
           const response = await axiosInstance.post('/api/chats', { participantId: userId });
           
-          // Update chats list with new chat
+        
           set(state => ({
             chats: [response.data, ...state.chats],
-            selectedChat: response.data // Automatically select the new chat
+            selectedChat: response.data 
           }));
 
-          // Fetch messages for the new chat
+        
           await get().fetchMessages(response.data._id);
 
           return response.data;
@@ -187,7 +184,7 @@ export const useChatStore = create(
         socket.off("messageError");
       },
 
-      // Add method to restore chat state
+  
       restoreChat: async () => {
         const selectedChat = get().selectedChat;
         if (selectedChat) {
@@ -196,10 +193,10 @@ export const useChatStore = create(
       }
     }),
     {
-      name: 'chat-storage', // name of the item in localStorage
+      name: 'chat-storage', 
       partialize: (state) => ({ 
         unreadMessages: state.unreadMessages,
-        // You can add other fields you want to persist here
+    
       })
     }
   )

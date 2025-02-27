@@ -4,7 +4,7 @@ import { protectRoute } from '../middlewares/auth.middleware.js';
 
 const router = express.Router();
 
-// Search users
+
 router.get('/search', protectRoute, async (req, res) => {
   try {
     const { query } = req.query;
@@ -29,12 +29,12 @@ router.get('/search', protectRoute, async (req, res) => {
   }
 });
 
-// Add this route to get all users
+
 router.get('/', protectRoute, async (req, res) => {
   try {
     const users = await User.find({})
       .select('fullName email profilePic isOnline lastSeen')
-      .sort({ isOnline: -1, fullName: 1 }); // Online users first, then alphabetically
+      .sort({ isOnline: -1, fullName: 1 }); 
 
     res.json(users);
   } catch (error) {

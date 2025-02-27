@@ -56,20 +56,17 @@ const Dashboard = () => {
           ))}
         </div>
 
-        {/* Main Content Grid */}
+ 
         <div className="grid lg:grid-cols-[1fr,300px] gap-8">
-          {/* Left Column */}
+   
           <div className="space-y-8">
-            {/* Recent Chats */}
+           
             <RecentChats />
 
-            {/* Activity Feed */}
             <ActivityFeed />
           </div>
 
-          {/* Right Column */}
           <div className="space-y-8">
-            {/* Online Users */}
             <OnlineUsers />
           </div>
         </div>

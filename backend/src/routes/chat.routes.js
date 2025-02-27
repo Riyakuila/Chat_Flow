@@ -4,7 +4,7 @@ import { Chat } from '../models/chat.model.js';
 
 const router = express.Router();
 
-// Get all chats with pagination
+
 router.get('/', protectRoute, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -38,7 +38,7 @@ router.get('/', protectRoute, async (req, res) => {
   }
 });
 
-// Get single chat details
+
 router.get('/:chatId', protectRoute, async (req, res) => {
   try {
     const chat = await Chat.findOne({
@@ -59,7 +59,7 @@ router.get('/:chatId', protectRoute, async (req, res) => {
   }
 });
 
-// Create a new chat
+
 router.post('/', protectRoute, async (req, res) => {
   try {
     const { participantId } = req.body;
@@ -68,7 +68,7 @@ router.post('/', protectRoute, async (req, res) => {
       return res.status(400).json({ error: 'Participant ID is required' });
     }
 
-    // Check if chat already exists between these users
+    
     const existingChat = await Chat.findOne({
       participants: {
         $all: [req.user._id, participantId],
@@ -80,7 +80,7 @@ router.post('/', protectRoute, async (req, res) => {
       return res.status(200).json(existingChat);
     }
 
-    // Create new chat
+    
     const newChat = await Chat.create({
       participants: [req.user._id, participantId],
       messages: []
@@ -93,7 +93,7 @@ router.post('/', protectRoute, async (req, res) => {
   }
 });
 
-// Archive/Delete chat
+
 router.delete('/:chatId', protectRoute, async (req, res) => {
   try {
     const chat = await Chat.findOne({
@@ -105,7 +105,7 @@ router.delete('/:chatId', protectRoute, async (req, res) => {
       return res.status(404).json({ error: 'Chat not found' });
     }
 
-    // Instead of deleting, we'll archive it for the user
+    
     chat.archivedFor = chat.archivedFor || [];
     if (!chat.archivedFor.includes(req.user._id)) {
       chat.archivedFor.push(req.user._id);
@@ -119,7 +119,7 @@ router.delete('/:chatId', protectRoute, async (req, res) => {
   }
 });
 
-// Mark chat as read
+
 router.put('/:chatId/read', protectRoute, async (req, res) => {
   try {
     const chat = await Chat.findOne({
@@ -131,7 +131,7 @@ router.put('/:chatId/read', protectRoute, async (req, res) => {
       return res.status(404).json({ error: 'Chat not found' });
     }
 
-    // Update last read timestamp for the user
+    
     chat.readBy = chat.readBy || {};
     chat.readBy[req.user._id] = new Date();
     await chat.save();

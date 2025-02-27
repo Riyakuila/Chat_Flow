@@ -101,9 +101,9 @@ const Profile = () => {
     <div className="bg-base-100 text-base-content">
       <div className="min-h-screen pt-16">
         <PageContainer>
-          {/* Cover and Profile Section */}
+          
           <div className="relative mb-24">
-            {/* Cover Image */}
+            
             <div className="h-48 md:h-64 rounded-xl overflow-hidden border-2 border-base-300">
               <img 
                 src={authUser?.coverImage || '/default-cover.jpg'} 
@@ -118,7 +118,7 @@ const Profile = () => {
               </button>
             </div>
 
-            {/* Profile Picture */}
+           
             <div className="absolute -bottom-16 left-8">
               <div className="relative">
                 <div className="w-32 h-32 rounded-full border-4 border-base-100 bg-base-300 flex items-center justify-center overflow-hidden">
@@ -143,7 +143,7 @@ const Profile = () => {
               </div>
             </div>
 
-            {/* Hidden file inputs */}
+           
             <input 
               type="file"
               ref={profileImageRef}
@@ -159,7 +159,7 @@ const Profile = () => {
               onChange={(e) => handleFileChange(e, 'cover')}
             />
 
-            {/* Edit Profile Button */}
+          
             <div className="absolute -bottom-16 right-8">
               <button 
                 onClick={() => setIsEditing(!isEditing)}
@@ -171,7 +171,7 @@ const Profile = () => {
             </div>
           </div>
 
-          {/* Profile Info */}
+         
           {isEditing ? (
             <form onSubmit={handleSubmit} className="max-w-2xl mx-auto space-y-6">
               <div className="form-control">
@@ -217,14 +217,14 @@ const Profile = () => {
           ) : (
             <div className="grid md:grid-cols-[2fr,1fr] gap-8">
               <div className="space-y-8">
-                {/* Basic Info */}
+                
                 <div className="space-y-4">
                   <h1 className="text-3xl font-bold">{authUser.fullName}</h1>
                   <p className="text-base-content/70">
                     {authUser.bio || 'No bio yet'}
                   </p>
                   
-                  {/* Quick Info */}
+                 
                   <div className="flex flex-wrap gap-4 text-base-content/70">
                     <div className="flex items-center gap-2">
                       <MapPin className="w-4 h-4" />
@@ -241,7 +241,7 @@ const Profile = () => {
                   </div>
                 </div>
 
-                {/* Stats Cards */}
+                
                 <div className="grid grid-cols-3 gap-4">
                   <div className="card bg-base-200">
                     <div className="card-body p-4 text-center">
@@ -263,7 +263,7 @@ const Profile = () => {
                   </div>
                 </div>
 
-                {/* About Section */}
+              
                 <div className="card bg-base-200">
                   <div className="card-body">
                     <h2 className="text-xl font-semibold mb-4">About</h2>
@@ -294,9 +294,9 @@ const Profile = () => {
                 </div>
               </div>
 
-              {/* Sidebar */}
+           
               <div className="space-y-6">
-                {/* Recent Activity */}
+                
                 <div className="card bg-base-200">
                   <div className="card-body">
                     <h2 className="text-xl font-semibold mb-4">Recent Activity</h2>
@@ -317,7 +317,7 @@ const Profile = () => {
                   </div>
                 </div>
 
-                {/* Connected Accounts */}
+               
                 <div className="card bg-base-200">
                   <div className="card-body">
                     <h2 className="text-xl font-semibold mb-4">Connected Accounts</h2>

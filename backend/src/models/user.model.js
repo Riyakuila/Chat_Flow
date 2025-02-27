@@ -44,7 +44,7 @@ const userSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Only create the text index for fullName
+
 userSchema.index({ fullName: 'text' });
 
 const User = mongoose.model('User', userSchema);

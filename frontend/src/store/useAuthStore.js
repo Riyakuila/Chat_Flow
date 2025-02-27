@@ -3,6 +3,8 @@ import axiosInstance from '../lib/axiosInstance'
 import toast from 'react-hot-toast'
 import { io } from 'socket.io-client'
 
+const BASE_URL = import.meta.env.MODE === 'development' ? 'http://localhost:5001' : '/';
+
 export const useAuthStore = create((set, get) => ({
   authUser: null,
   isSigningUp: false,
@@ -80,7 +82,7 @@ export const useAuthStore = create((set, get) => ({
       let config = {};
       let requestData = data;
 
-      // Check if it's FormData (for image uploads)
+      
       if (data instanceof FormData) {
         config = {
           headers: {
@@ -88,7 +90,7 @@ export const useAuthStore = create((set, get) => ({
           },
         };
       } else {
-        // For regular data updates
+        
         config = {
           headers: {
             'Content-Type': 'application/json',
@@ -99,7 +101,7 @@ export const useAuthStore = create((set, get) => ({
       const response = await axiosInstance.put('/api/auth/profile', requestData, config);
       console.log('Profile update response:', response.data);
 
-      // Update local state
+      
       set(state => ({
         authUser: {
           ...state.authUser,

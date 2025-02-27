@@ -19,7 +19,7 @@ const CallPage = () => {
   useEffect(() => {
     const setupCall = async () => {
       try {
-        // Get call data from localStorage
+    
         const storedCallData = JSON.parse(localStorage.getItem('callData'));
         console.log('Retrieved call data:', storedCallData);
 
@@ -31,7 +31,7 @@ const CallPage = () => {
 
         setCallData(storedCallData);
 
-        // Get media stream
+        
         const mediaStream = await navigator.mediaDevices.getUserMedia({
           video: storedCallData.isVideo,
           audio: true
@@ -44,7 +44,7 @@ const CallPage = () => {
           myVideo.current.srcObject = mediaStream;
         }
 
-        // If we're the call initiator
+      
         if (storedCallData.isInitiator) {
           console.log('Initiating call as caller');
           const peer = new Peer({
@@ -84,7 +84,7 @@ const CallPage = () => {
     }
 
     return () => {
-      // Cleanup
+  
       if (stream) {
         stream.getTracks().forEach(track => {
           track.stop();

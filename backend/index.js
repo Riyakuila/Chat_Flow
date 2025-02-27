@@ -9,26 +9,24 @@ import cors from 'cors';
 import chatRoutes from './src/routes/chat.routes.js';
 import userRoutes from './src/routes/user.routes.js';
 import {app, server} from './src/lib/soket.js';
-
-
+import path from 'path';
 
 
 
 dotenv.config();
 
 
-
-
 const PORT = process.env.PORT;
+const __dirname = path.resolve();
 
-// Add middleware debugging
+
 app.use((req, res, next) => {
     console.log('Raw body:', req.body);
     console.log('Content-Type:', req.headers['content-type']);
     next();
 });
 
-// Middleware
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -37,18 +35,25 @@ app.use(cors({
     credentials: true,
 }));
 
-// Add post-middleware debugging
+
 app.use((req, res, next) => {
     console.log('Parsed body:', req.body);
     next();
 });
 
-// Routes
+
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/chats", chatRoutes);
 app.use("/api/users", userRoutes);
 connectDB();
+
+if (process.env.NODE_ENV === 'production') {
+    app.use(express.static(path.join(__dirname, '../frontend/dist')));
+    app.get('*', (req, res) => {
+        res.sendFile(path.resolve(__dirname, '../frontend', 'dist', 'index.html'));
+    });
+}
 
 EventEmitter.defaultMaxListeners = 15;
 

@@ -13,6 +13,7 @@
     "@tailwindcss/vite": "^4.0.6",
     "axios": "^1.7.9",
     "browserify-zlib": "^0.2.0",
+    "chatflow": "file:..",
     "date-fns": "^4.1.0",
     "emoji-picker-react": "^4.12.0",
     "lucide-react": "^0.475.0",

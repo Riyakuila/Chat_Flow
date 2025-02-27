@@ -6,7 +6,7 @@ import { protectRoute } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 
-// Configure multer for file uploads
+
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, 'uploads/');
@@ -18,7 +18,7 @@ const storage = multer.diskStorage({
 });
 
 const fileFilter = (req, file, cb) => {
-  // Accept all image types
+  
   if (file.mimetype.startsWith('image/')) {
     cb(null, true);
   } else {
@@ -32,7 +32,7 @@ const upload = multer({
   fileFilter: fileFilter
 });
 
-// Error handling middleware
+
 const uploadErrorHandler = (err, req, res, next) => {
   if (err instanceof multer.MulterError) {
     if (err.code === 'LIMIT_FILE_SIZE') {
@@ -51,7 +51,7 @@ router.post("/login", login);
 router.post("/logout", logout);
 router.get("/check", protectRoute, checkAuth);
 
-// Update profile route with file upload and error handling
+
 router.put("/profile", 
   protectRoute,
   (req, res, next) => {

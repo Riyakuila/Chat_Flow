@@ -2,12 +2,12 @@ import {Server} from "socket.io";
 import http from "http";
 import express from "express";
 import User from "../models/user.model.js";
-import Message from "../models/message.model.js";
+
 
 const app = express();
 const server = http.createServer(app);
 
-// Attach Socket.IO to the HTTP server
+
 const io = new Server(server, {
     cors: {
         origin: "http://localhost:5173",
@@ -18,7 +18,7 @@ const io = new Server(server, {
     transports: ['websocket', 'polling']
 });
 
-const userSocketMap = new Map(); // Using Map instead of object for better handling
+const userSocketMap = new Map(); 
 
 export const getReceiverSocketId = (receiverId) => {
     return userSocketMap.get(receiverId);
@@ -29,19 +29,19 @@ io.on("connection", (socket) => {
     console.log("User connected:", userId);
 
     if (userId) {
-        // Store user's socket
+        
         userSocketMap.set(userId, socket.id);
-        // Broadcast updated online users
+        
         io.emit("getOnlineUsers", Array.from(userSocketMap.keys()));
     }
 
-    // Add ping/pong mechanism to check active connections
+    
     const pingInterval = setInterval(() => {
         socket.emit("ping");
     }, 5000);
 
     socket.on("pong", () => {
-        // User is still connected
+        
         console.log("Pong received from user:", userId);
     });
 
@@ -50,9 +50,9 @@ io.on("connection", (socket) => {
         clearInterval(pingInterval);
         
         if (userId) {
-            // Remove user from online list
+        
             userSocketMap.delete(userId);
-            // Broadcast updated online users
+        
             io.emit("getOnlineUsers", Array.from(userSocketMap.keys()));
         }
     });
@@ -67,7 +67,7 @@ io.on("connection", (socket) => {
         }
     });
 
-    // Force disconnect after timeout
+    
     socket.on("disconnecting", () => {
         console.log("User disconnecting:", userId);
         if (userId) {
@@ -76,7 +76,7 @@ io.on("connection", (socket) => {
         }
     });
 
-    // Call signaling
+
     socket.on("callUser", (data) => {
         console.log("Call request received:", data);
         const receiverSocketId = userSocketMap.get(data.userToCall);
@@ -208,7 +208,7 @@ io.on("connection", (socket) => {
     });
 });
 
-// Clean up function to periodically check for stale connections
+
 setInterval(() => {
     for (const [userId, socketId] of userSocketMap.entries()) {
         const socket = io.sockets.sockets.get(socketId);

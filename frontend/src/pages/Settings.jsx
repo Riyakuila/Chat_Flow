@@ -103,7 +103,7 @@ const Settings = () => {
           </div>
 
           <div className="grid md:grid-cols-[240px,1fr] gap-8">
-            {/* Sidebar */}
+            
             <nav className="flex flex-col space-y-1">
               {tabs.map((tab) => (
                 <button
@@ -121,14 +121,14 @@ const Settings = () => {
               ))}
             </nav>
 
-            {/* Content */}
+        
             <div className="card bg-base-200">
               <div className="card-body">
                 {activeTab === "account" && (
                   <div className="space-y-6">
                     <h2 className="text-xl font-semibold">Profile Settings</h2>
                     
-                    {/* Profile Picture Section */}
+            
                     <div className="flex items-center gap-6">
                       <div className="relative">
                         <div className="w-24 h-24 rounded-full bg-base-300 flex items-center justify-center overflow-hidden">
@@ -164,7 +164,7 @@ const Settings = () => {
                       </div>
                     </div>
 
-                    {/* Hidden file inputs */}
+            
                     <input 
                       type="file"
                       ref={profileImageRef}
@@ -180,7 +180,7 @@ const Settings = () => {
                       onChange={(e) => handleFileChange(e, 'cover')}
                     />
 
-                    {/* Profile Form */}
+              
                     <form onSubmit={handleSubmit} className="space-y-4">
                       <div className="form-control w-full max-w-md">
                         <label className="label">

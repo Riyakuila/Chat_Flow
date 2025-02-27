@@ -47,7 +47,7 @@ const ChatPage = () => {
       name: authUser.fullName
     });
 
-    // Store call data
+  
     const callData = {
       receiverId: selectedChat.participantId,
       isVideo,
@@ -58,17 +58,17 @@ const ChatPage = () => {
     };
 
     try {
-      // Save call data to localStorage
+    
       localStorage.setItem('callData', JSON.stringify(callData));
       
-      // Navigate to call page
+    
       navigate('/call');
     } catch (error) {
       console.error('Error initiating call:', error);
     }
   };
 
-  // Add socket listener for incoming calls
+  
   useEffect(() => {
     if (!socket) return;
 
@@ -78,7 +78,7 @@ const ChatPage = () => {
         const callData = {
           ...data,
           isInitiator: false,
-          receiverId: data.from // The caller's ID becomes the receiver ID for the callee
+          receiverId: data.from 
         };
         localStorage.setItem('callData', JSON.stringify(callData));
         navigate('/call');
@@ -93,13 +93,13 @@ const ChatPage = () => {
   }, [socket, navigate]);
 
   useEffect(() => {
-    // Restore chat state on component mount
+   
     restoreChat();
     
-    // Set up message subscription
+    
     subscribeToMessages();
 
-    // Cleanup on unmount
+   
     return () => {
       console.log("Cleaning up message subscription");
       unsubscribeFromMessages();
@@ -110,12 +110,12 @@ const ChatPage = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Fetch all users
+  
   useEffect(() => {
     const fetchUsers = async () => {
       try {
         const response = await axiosInstance.get('/api/users');
-        // Filter out current user from the list
+        
         const filteredUsers = response.data.filter(user => user._id !== authUser?._id);
         setAllUsers(filteredUsers);
       } catch (error) {
@@ -126,7 +126,7 @@ const ChatPage = () => {
     fetchUsers();
   }, [authUser]);
 
-  // Scroll to bottom of messages
+  
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -135,7 +135,7 @@ const ChatPage = () => {
     scrollToBottom();
   }, [messages]);
 
-  // Add console logs to debug
+  
   useEffect(() => {
     console.log('Auth User:', authUser);
     console.log('All Users:', allUsers);
@@ -144,12 +144,12 @@ const ChatPage = () => {
     console.log('Messages:', messages);
   }, [authUser, allUsers, chats, selectedChat, messages]);
 
-  // Debug log to check unread messages
+ 
   useEffect(() => {
     console.log("Current unread messages:", unreadMessages);
   }, [unreadMessages]);
 
-  // Add click outside handler
+  
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (emojiPickerRef.current && !emojiPickerRef.current.contains(event.target)) {
@@ -189,7 +189,7 @@ const ChatPage = () => {
     try {
       const selectedUser = allUsers.find(user => user._id === userId);
       const chatData = await createChat(userId);
-      // Add the user info to the chat object
+      
       const chatWithUserInfo = {
         ...chatData,
         participantId: userId,
@@ -201,19 +201,19 @@ const ChatPage = () => {
     }
   };
 
-  // Helper function to get the other user in the chat
+  
   const getOtherUser = (chat) => {
     if (!chat || !authUser || !allUsers) return null;
     const otherUser = allUsers.find(user => user._id === chat.participantId);
     return otherUser || null;
   };
 
-  // Helper function to safely format date
+ 
   const formatMessageTime = (timestamp) => {
     try {
       if (!timestamp) return '';
       const date = new Date(timestamp);
-      // Check if date is valid
+      
       if (isNaN(date.getTime())) return '';
       return format(date, 'HH:mm');
     } catch (error) {
@@ -223,11 +223,11 @@ const ChatPage = () => {
   };
 
   const onEmojiClick = (emojiObject, event) => {
-    event.preventDefault(); // Prevent any default behavior
+    event.preventDefault(); 
     setMessage(prevMessage => prevMessage + emojiObject.emoji);
   };
 
-  // Function to check if a user is online
+  
   const isUserOnline = (userId) => {
     return onlineUsers.includes(userId);
   };

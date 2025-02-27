@@ -36,10 +36,10 @@ const SignUpPage = () => {
 
   return (
     <div className="min-h-screen grid lg:grid-cols-2">
-      {/* left side */}
+      
       <div className="flex flex-col items-center px-6 py-16 sm:px-12 mt-12">
         <div className="w-full max-w-md">
-          {/* LOGO */}
+  
           <div className="text-center mb-8">
             <div className="flex flex-col items-center gap-3">
               <img 
@@ -146,7 +146,7 @@ const SignUpPage = () => {
         </div>
       </div>
 
-      {/* right side */}
+      
       <AuthImagePattern
         title="Join our community"
         subtitle="Connect with friends, share moments, and stay in touch with your loved ones."
