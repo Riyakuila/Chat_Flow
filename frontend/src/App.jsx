@@ -48,7 +48,7 @@ const AppContent = () => {
         <Routes>
           <Route path="/" element={authUser ? <ChatPage /> : <HomePage />} />
           <Route path="/login" element={authUser ? <Navigate to='/chat' /> : <LoginPage />} />
-          <Route path="/signup" element={<SignupPage />} />
+          <Route path="/signup" element={authUser ? <Navigate to='/chat' /> : <SignupPage />} />
           <Route path="/profile" element={<Profile />} />
           <Route path='/dashboard' element={authUser ? <Dashboard /> : <Navigate to='/login' />} />
           <Route path='/chat' element={authUser ? <ChatPage /> : <Navigate to='/login' />} />
