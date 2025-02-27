@@ -282,8 +282,8 @@ const ChatPage = () => {
           ) : (
             <div className="space-y-1">
               {filteredUsers.map((user) => {
-                const unreadCount = unreadMessages[user._id] || 0; // Get unread count
-                console.log(`Unread messages for ${user.fullName}:`, unreadCount); // Debug log
+                const unreadCount = unreadMessages[user._id] || 0; 
+                console.log(`Unread messages for ${user.fullName}:`, unreadCount); 
 
                 return (
                   <div 

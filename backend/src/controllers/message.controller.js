@@ -55,7 +55,7 @@ export const sendMessage = async (req, res) => {
 
         const savedMessage = await newMessage.save();
         
-        // Just send the response, socket emission is handled separately
+        
         res.status(201).json(savedMessage);
     } catch (error) {
         console.error("Error in sendMessage:", error);

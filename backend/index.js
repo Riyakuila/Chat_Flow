@@ -9,7 +9,7 @@ import cors from 'cors';
 import chatRoutes from './src/routes/chat.routes.js';
 import userRoutes from './src/routes/user.routes.js';
 import {app, server} from './src/lib/soket.js';
-import path from 'path';
+
 
 
 
@@ -17,7 +17,7 @@ dotenv.config();
 
 
 const PORT = process.env.PORT;
-const __dirname = path.resolve();
+
 
 
 app.use((req, res, next) => {
@@ -48,12 +48,7 @@ app.use("/api/chats", chatRoutes);
 app.use("/api/users", userRoutes);
 connectDB();
 
-if (process.env.NODE_ENV === 'production') {
-    app.use(express.static(path.join(__dirname, '../frontend/dist')));
-    app.get('*', (req, res) => {
-        res.sendFile(path.resolve(__dirname, '../frontend', 'dist', 'index.html'));
-    });
-}
+
 
 EventEmitter.defaultMaxListeners = 15;
 
