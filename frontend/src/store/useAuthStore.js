@@ -3,7 +3,7 @@ import axiosInstance from '../lib/axiosInstance'
 import toast from 'react-hot-toast'
 import { io } from 'socket.io-client'
 
-const BASE_URL = 'http://localhost:5001';
+const BASE_URL = 'https://chat-flow-i303.onrender.com';
 
 export const useAuthStore = create((set, get) => ({
   authUser: null,
