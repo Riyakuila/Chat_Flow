@@ -114,7 +114,7 @@ const ChatPage = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await axiosInstance.get('/api/users');
+        const response = await axiosInstance.get('/users');
         
         const filteredUsers = response.data.filter(user => user._id !== authUser?._id);
         setAllUsers(filteredUsers);
@@ -233,18 +233,18 @@ const ChatPage = () => {
   };
 
   return (
-    <div className="h-screen pt-16 flex bg-base-100">
+    <div className="flex h-screen pt-16 bg-base-100">
       {/* Sidebar */}
       <div className="w-[320px] border-r border-base-300 flex flex-col bg-base-100">
         {/* Sidebar Header */}
-        <div className="p-4 border-b border-base-300 flex items-center justify-between">
+        <div className="flex items-center justify-between p-4 border-b border-base-300">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-base-300 flex items-center justify-center">
+            <div className="flex items-center justify-center w-10 h-10 rounded-full bg-base-300">
               {authUser?.profileImage ? (
                 <img 
                   src={authUser.profileImage} 
                   alt="profile" 
-                  className="w-full h-full rounded-full object-cover"
+                  className="object-cover w-full h-full rounded-full"
                 />
               ) : (
                 <span className="text-xl font-bold text-base-content/40">
@@ -265,11 +265,11 @@ const ChatPage = () => {
             <input 
               type="text" 
               placeholder="Search chats..." 
-              className="input input-bordered w-full pl-10"
+              className="w-full pl-10 input input-bordered"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
-            <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-base-content/50" />
+            <Search className="absolute w-5 h-5 -translate-y-1/2 left-3 top-1/2 text-base-content/50" />
           </div>
         </div>
 
@@ -289,16 +289,16 @@ const ChatPage = () => {
                   <div 
                     key={user._id}
                     onClick={() => startNewChat(user._id)}
-                    className="flex items-center gap-3 p-4 hover:bg-base-200 cursor-pointer transition-colors relative"
+                    className="relative flex items-center gap-3 p-4 transition-colors cursor-pointer hover:bg-base-200"
                   >
                     {/* User Avatar with Online Status */}
                     <div className="relative">
-                      <div className="w-12 h-12 rounded-full bg-base-300 flex items-center justify-center overflow-hidden">
+                      <div className="flex items-center justify-center w-12 h-12 overflow-hidden rounded-full bg-base-300">
                         {user.profilePic ? (
                           <img 
                             src={user.profilePic} 
                             alt={user.fullName}
-                            className="w-full h-full object-cover"
+                            className="object-cover w-full h-full"
                           />
                         ) : (
                           <span className="text-xl font-bold text-base-content/40">
@@ -309,7 +309,7 @@ const ChatPage = () => {
                       {/* Online Status Indicator */}
                       {isUserOnline(user._id) && (
                         <div className="absolute -top-1 -right-1">
-                          <Circle className="w-3 h-3 fill-green-500 text-green-500" />
+                          <Circle className="w-3 h-3 text-green-500 fill-green-500" />
                         </div>
                       )}
                     </div>
@@ -332,7 +332,7 @@ const ChatPage = () => {
 
                     {/* Unread Count Indicator */}
                     {unreadCount > 0 && (
-                      <div className="absolute top-1 right-1 bg-purple-500 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow-lg">
+                      <div className="absolute flex items-center justify-center w-6 h-6 text-xs font-bold text-white bg-purple-500 rounded-full shadow-lg top-1 right-1">
                         {unreadCount}
                       </div>
                     )}
@@ -346,28 +346,28 @@ const ChatPage = () => {
 
       {/* Chat Area */}
       {selectedChat ? (
-        <div className="flex-1 flex flex-col">
+        <div className="flex flex-col flex-1">
           {/* Chat Header */}
-          <div className="shadow-sm p-4 flex items-center justify-between">
+          <div className="flex items-center justify-between p-4 shadow-sm">
             <div className="flex items-center gap-3">
               {/* Profile Picture and Name */}
               <div className="relative">
-                <div className="w-10 h-10 rounded-full bg-base-300 overflow-hidden">
+                <div className="w-10 h-10 overflow-hidden rounded-full bg-base-300">
                   {getOtherUser(selectedChat)?.profilePic ? (
                     <img 
                       src={getOtherUser(selectedChat).profilePic} 
                       alt="Profile"
-                      className="w-full h-full object-cover"
+                      className="object-cover w-full h-full"
                     />
                   ) : (
-                    <span className="w-full h-full flex items-center justify-center text-lg font-semibold">
+                    <span className="flex items-center justify-center w-full h-full text-lg font-semibold">
                       {getOtherUser(selectedChat)?.fullName?.charAt(0)}
                     </span>
                   )}
                 </div>
                 {isUserOnline(getOtherUser(selectedChat)?._id) && (
                   <div className="absolute -top-1 -right-1">
-                    <Circle className="w-3 h-3 fill-green-500 text-green-500" />
+                    <Circle className="w-3 h-3 text-green-500 fill-green-500" />
                   </div>
                 )}
               </div>
@@ -399,7 +399,7 @@ const ChatPage = () => {
           </div>
 
           {/* Messages Area */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          <div className="flex-1 p-4 space-y-4 overflow-y-auto">
             {isLoadingMessages ? (
               <div className="flex justify-center">
                 <span className="loading loading-spinner loading-md"></span>
@@ -418,7 +418,7 @@ const ChatPage = () => {
                     }`}
                   >
                     <p className="mb-1">{msg.content}</p>
-                    <p className="text-xs opacity-70 text-right">
+                    <p className="text-xs text-right opacity-70">
                       {formatMessageTime(msg.createdAt || msg.timestamp)}
                     </p>
                   </div>
@@ -433,7 +433,7 @@ const ChatPage = () => {
           </div>
 
           {/* Message Input */}
-          <div className="p-4 relative">
+          <div className="relative p-4">
             <form onSubmit={handleSendMessage} className="flex items-center gap-2">
               <div className="relative">
                 <button 
@@ -445,7 +445,7 @@ const ChatPage = () => {
                 </button>
                 
                 {showEmojiPicker && (
-                  <div ref={emojiPickerRef} className="absolute bottom-12 left-0 z-50">
+                  <div ref={emojiPickerRef} className="absolute left-0 z-50 bottom-12">
                     <EmojiPicker
                       onEmojiClick={onEmojiClick}
                       width={300}
@@ -486,12 +486,12 @@ const ChatPage = () => {
         </div>
       ) : (
         // Empty state when no chat is selected
-        <div className="flex-1 flex items-center justify-center">
+        <div className="flex items-center justify-center flex-1">
           <div className="text-center">
-            <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full">
               <MessageCircle className="w-8 h-8 text-purple-600" />
             </div>
-            <h3 className="text-xl font-semibold mb-2">Start Chatting</h3>
+            <h3 className="mb-2 text-xl font-semibold">Start Chatting</h3>
             <p className="text-gray-500">Select an Account to Start a Conversation</p>
           </div>
         </div>

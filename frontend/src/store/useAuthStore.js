@@ -4,6 +4,7 @@ import toast from 'react-hot-toast'
 import { io } from 'socket.io-client'
 
 const BASE_URL = import.meta.env.VITE_BACKEND_URL;
+console.log(BASE_URL)
 
 
 export const useAuthStore = create((set, get) => ({
@@ -16,7 +17,7 @@ export const useAuthStore = create((set, get) => ({
 
   checkAuth: async () => {
     try {
-      const response = await axiosInstance.get('/api/auth/check');
+      const response = await axiosInstance.get('/auth/check');
       console.log('Auth check response:', response.data);
       set({ authUser: response.data });
       get().connectToSocket();
@@ -31,7 +32,7 @@ export const useAuthStore = create((set, get) => ({
   signup: async (formData) => {
     set({ isSigningUp: true });
     try {
-        const response = await axiosInstance.post('/api/auth/signup', formData);
+        const response = await axiosInstance.post('/auth/signup', formData);
         set({ authUser: response.data });
         toast.success("Account created successfully");
         get().connectToSocket();
@@ -46,7 +47,7 @@ export const useAuthStore = create((set, get) => ({
 
   logout: async () => {
     try {
-        await axiosInstance.post('/api/auth/logout');
+        await axiosInstance.post('/auth/logout');
         set({ authUser: null });
         toast.success("Logged out successfully");
         get().disconnectFromSocket();
@@ -63,7 +64,7 @@ export const useAuthStore = create((set, get) => ({
   login: async (formData) => {
     set({ isLoggingIn: true });
     try {
-      const response = await axiosInstance.post('/api/auth/login', formData);
+      const response = await axiosInstance.post('/auth/login', formData);
       set({ authUser: response.data });
       toast.success("Logged in successfully");
 
@@ -99,7 +100,7 @@ export const useAuthStore = create((set, get) => ({
         };
       }
 
-      const response = await axiosInstance.put('/api/auth/profile', requestData, config);
+      const response = await axiosInstance.put('/auth/profile', requestData, config);
       console.log('Profile update response:', response.data);
 
       
@@ -127,7 +128,7 @@ export const useAuthStore = create((set, get) => ({
       const formData = new FormData();
       formData.append('profileImage', file);
 
-      const response = await axiosInstance.put('/api/auth/profile/image', formData, {
+      const response = await axiosInstance.put('/auth/profile/image', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -159,7 +160,7 @@ export const useAuthStore = create((set, get) => ({
       const formData = new FormData();
       formData.append('coverImage', file);
 
-      const response = await axiosInstance.put('/api/auth/profile/cover', formData, {
+      const response = await axiosInstance.put('/auth/profile/cover', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -186,7 +187,7 @@ export const useAuthStore = create((set, get) => ({
   updateProfileDetails: async (details) => {
     set({ isUpdatingProfile: true });
     try {
-      const response = await axiosInstance.put('/api/auth/profile/details', details);
+      const response = await axiosInstance.put('/auth/profile/details', details);
 
       set(state => ({
         authUser: {
@@ -208,7 +209,7 @@ export const useAuthStore = create((set, get) => ({
 
   deleteAccount: async () => {
     try {
-      await axiosInstance.delete('/api/auth/profile');
+      await axiosInstance.delete('/auth/profile');
       set({ authUser: null });
       toast.success('Account deleted successfully');
     } catch (error) {

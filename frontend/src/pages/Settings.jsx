@@ -66,7 +66,6 @@ const Settings = () => {
       toast.success(`${type === 'profile' ? 'Profile' : 'Cover'} image updated successfully`);
     } catch (error) {
       console.error('Error uploading image:', error);
-      toast.error('Error uploading image');
     }
   };
 
@@ -94,10 +93,10 @@ const Settings = () => {
       <PageContainer>
         <div className="flex flex-col space-y-6">
           <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent">
+            <h1 className="text-3xl font-bold text-transparent bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text">
               Settings
             </h1>
-            <p className="text-base-content/70 mt-2">
+            <p className="mt-2 text-base-content/70">
               Manage your account settings and preferences
             </p>
           </div>
@@ -131,12 +130,12 @@ const Settings = () => {
             
                     <div className="flex items-center gap-6">
                       <div className="relative">
-                        <div className="w-24 h-24 rounded-full bg-base-300 flex items-center justify-center overflow-hidden">
+                        <div className="flex items-center justify-center w-24 h-24 overflow-hidden rounded-full bg-base-300">
                           {authUser?.profileImage ? (
                             <img 
                               src={authUser.profileImage} 
                               alt="Profile" 
-                              className="w-full h-full object-cover"
+                              className="object-cover w-full h-full"
                             />
                           ) : (
                             <User className="w-12 h-12 text-base-content/40" />
@@ -144,19 +143,19 @@ const Settings = () => {
                         </div>
                         <button 
                           onClick={() => handleImageUpload('profile')}
-                          className="absolute bottom-0 right-0 p-2 rounded-full bg-purple-600 text-white hover:bg-purple-700 transition-colors"
+                          className="absolute bottom-0 right-0 p-2 text-white transition-colors bg-purple-600 rounded-full hover:bg-purple-700"
                         >
                           <Camera className="w-4 h-4" />
                         </button>
                       </div>
                       <div>
                         <h3 className="font-medium">Profile Picture</h3>
-                        <p className="text-sm text-base-content/70 mb-2">
+                        <p className="mb-2 text-sm text-base-content/70">
                           Upload a profile picture or choose from our avatars
                         </p>
                         <button 
                           onClick={() => handleImageUpload('profile')}
-                          className="btn btn-sm btn-outline gap-2"
+                          className="gap-2 btn btn-sm btn-outline"
                         >
                           <Image className="w-4 h-4" />
                           Choose Picture
@@ -182,9 +181,9 @@ const Settings = () => {
 
               
                     <form onSubmit={handleSubmit} className="space-y-4">
-                      <div className="form-control w-full max-w-md">
+                      <div className="w-full max-w-md form-control">
                         <label className="label">
-                          <span className="label-text font-medium">Display Name</span>
+                          <span className="font-medium label-text">Display Name</span>
                         </label>
                         <input
                           type="text"
@@ -195,21 +194,21 @@ const Settings = () => {
                         />
                       </div>
 
-                      <div className="form-control w-full max-w-md">
+                      <div className="w-full max-w-md form-control">
                         <label className="label">
-                          <span className="label-text font-medium">About</span>
+                          <span className="font-medium label-text">About</span>
                         </label>
                         <textarea
-                          className="textarea textarea-bordered h-24"
+                          className="h-24 textarea textarea-bordered"
                           placeholder="Tell us about yourself"
                           value={formData.bio}
                           onChange={(e) => setFormData({...formData, bio: e.target.value})}
                         />
                       </div>
 
-                      <div className="form-control w-full max-w-md">
+                      <div className="w-full max-w-md form-control">
                         <label className="label">
-                          <span className="label-text font-medium">Location</span>
+                          <span className="font-medium label-text">Location</span>
                         </label>
                         <input
                           type="text"
@@ -220,9 +219,9 @@ const Settings = () => {
                         />
                       </div>
 
-                      <div className="form-control w-full max-w-md">
+                      <div className="w-full max-w-md form-control">
                         <label className="label">
-                          <span className="label-text font-medium">Website</span>
+                          <span className="font-medium label-text">Website</span>
                         </label>
                         <input
                           type="url"
@@ -279,7 +278,7 @@ const Settings = () => {
                             Automatically download media files
                           </p>
                         </div>
-                        <select className="select select-bordered w-48">
+                        <select className="w-48 select select-bordered">
                           <option>Wi-Fi Only</option>
                           <option>Always</option>
                           <option>Never</option>
@@ -295,7 +294,7 @@ const Settings = () => {
                             Choose a background for your chats
                           </p>
                         </div>
-                        <button className="btn btn-outline gap-2">
+                        <button className="gap-2 btn btn-outline">
                           <Image className="w-4 h-4" />
                           Choose Wallpaper
                         </button>
@@ -339,7 +338,7 @@ const Settings = () => {
 
                       <div className="space-y-4">
                         <h3 className="font-medium">Language</h3>
-                        <select className="select select-bordered w-full max-w-md">
+                        <select className="w-full max-w-md select select-bordered">
                           <option>English</option>
                           <option>Spanish</option>
                           <option>French</option>
@@ -435,7 +434,7 @@ const Settings = () => {
                             Add an extra layer of security
                           </p>
                         </div>
-                        <button className="btn btn-outline gap-2">
+                        <button className="gap-2 btn btn-outline">
                           <Lock className="w-4 h-4" />
                           Enable 2FA
                         </button>
@@ -475,7 +474,7 @@ const Settings = () => {
 
                       <div className="divider"></div>
 
-                      <button className="btn btn-outline gap-2 w-full max-w-md">
+                      <button className="w-full max-w-md gap-2 btn btn-outline">
                         <Key className="w-4 h-4" />
                         Change Password
                       </button>

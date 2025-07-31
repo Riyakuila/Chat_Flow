@@ -19,7 +19,7 @@ export const useChatStore = create(
       fetchChats: async () => {
         set({ isLoadingChats: true });
         try {
-          const response = await axiosInstance.get('/api/chats');
+          const response = await axiosInstance.get('/chats');
           set({ chats: response.data.chats || [] });
         } catch (error) {
           console.log('Error fetching chats:', error);
@@ -34,7 +34,7 @@ export const useChatStore = create(
       fetchMessages: async (participantId) => {
         try {
           set({ isLoadingMessages: true });
-          const response = await axiosInstance.get(`/api/messages/${participantId}`);
+          const response = await axiosInstance.get(`/messages/${participantId}`);
           set({ messages: response.data });
         } catch (error) {
           console.error("Error fetching messages:", error);
@@ -50,7 +50,7 @@ export const useChatStore = create(
           const socket = useAuthStore.getState().socket;
           
   
-          const response = await axiosInstance.post(`/api/messages/${receiverId}`, {
+          const response = await axiosInstance.post(`/messages/${receiverId}`, {
             content
           });
 
@@ -90,7 +90,7 @@ export const useChatStore = create(
 
       createChat: async (userId) => {
         try {
-          const response = await axiosInstance.post('/api/chats', { participantId: userId });
+          const response = await axiosInstance.post('/chats', { participantId: userId });
           
         
           set(state => ({

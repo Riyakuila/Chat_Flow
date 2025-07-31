@@ -18,7 +18,7 @@ const AddFriend = () => {
 
     setIsLoading(true);
     try {
-      const response = await axiosInstance.get(`/api/users/search?query=${searchQuery}`);
+      const response = await axiosInstance.get(`/users/search?query=${searchQuery}`);
       
       const filteredResults = response.data.filter(user => user._id !== authUser._id);
       setSearchResults(filteredResults);
@@ -43,7 +43,7 @@ const AddFriend = () => {
 
   return (
     <div className="p-4 bg-white rounded-lg shadow">
-      <h2 className="text-xl font-semibold mb-4">Find Friends</h2>
+      <h2 className="mb-4 text-xl font-semibold">Find Friends</h2>
       
       <form onSubmit={handleSearch} className="mb-4">
         <div className="relative">
@@ -56,7 +56,7 @@ const AddFriend = () => {
           />
           <button
             type="submit"
-            className="absolute right-2 top-1/2 -translate-y-1/2"
+            className="absolute -translate-y-1/2 right-2 top-1/2"
             disabled={isLoading}
           >
             <Search className="w-5 h-5 text-gray-500" />
@@ -65,7 +65,7 @@ const AddFriend = () => {
       </form>
 
       {isLoading && (
-        <div className="text-center py-4">
+        <div className="py-4 text-center">
           <div className="loading loading-spinner loading-md"></div>
         </div>
       )}
@@ -74,13 +74,13 @@ const AddFriend = () => {
         {searchResults.map((user) => (
           <div
             key={user._id}
-            className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+            className="flex items-center justify-between p-3 rounded-lg bg-gray-50"
           >
             <div className="flex items-center gap-3">
               <img
                 src={user.profilePic || '/default-avatar.png'}
                 alt={user.fullName}
-                className="w-10 h-10 rounded-full object-cover"
+                className="object-cover w-10 h-10 rounded-full"
               />
               <div>
                 <h3 className="font-medium">{user.fullName}</h3>
@@ -98,7 +98,7 @@ const AddFriend = () => {
       </div>
 
       {searchResults.length === 0 && searchQuery && !isLoading && (
-        <p className="text-center text-gray-500 py-4">
+        <p className="py-4 text-center text-gray-500">
           No users found. Try a different search term.
         </p>
       )}
