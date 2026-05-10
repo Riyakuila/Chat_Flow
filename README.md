@@ -61,7 +61,7 @@ ChatFlow is a real-time chat application built using the MERN stack (MongoDB, Ex
 
 4. Start the backend server:
    ```
-   npm start
+   npm run dev
    ```
 
 ### Frontend Setup
